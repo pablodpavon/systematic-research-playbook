@@ -14,13 +14,19 @@ The split is the point. A single agent that designs, implements, and evaluates i
 
 **Role 0 — the human.** I own every commit, every merge, every purchase, every irreversible action. Both agents produce; I ratify. This is not ceremony — it is the single control that makes the rest recoverable.
 
-## The fence: deny by default
+## The fence: deny by default, verified at its own layer
 
-The coding agent runs inside three independent layers. Any one of them failing still leaves two.
+The coding agent runs inside independent layers, ordered here by how much weight they actually carry. I learned that ordering the hard way — see `LESSONS.md` #8–#12 for the build story of this repository's own example, where the fence failed twice before it held.
 
-1. **Workspace isolation.** The agent works in a dedicated workspace (a separate clone or worktree), never in the production tree. Worst case, the blast radius is a disposable directory.
-2. **Permission configuration.** An explicit allow/deny policy file: denied paths (protected source, system commands, anything destructive), allowed write-scopes (the research workspace only), and **no git mutations** — the agent can read history but never write it. Deny rules win over allow rules.
-3. **A pre-execution guard.** A hook that inspects each shell command before it runs and blocks pattern-matches against a denylist. Crude and occasionally overcautious — mine has blocked legitimate commands, and the agent simply rerouted — which is exactly the right failure direction.
+1. **Operating-system isolation — the load-bearing layer.** For genuinely sensitive separation, the agent runs as a *separate OS user* with no filesystem rights over the protected trees. Denial then comes from the kernel, which does not depend on any tool configuration loading correctly. This is the only layer in this list whose enforcement you can prove with two commands from a shell.
+2. **Workspace isolation.** The agent works in a dedicated workspace (a separate clone, worktree, or home directory), never in the production tree. Worst case, the blast radius is a disposable directory.
+3. **Permission configuration.** An explicit allow/deny policy file: denied paths, allowed write-scopes, and **no git mutations** — the agent can read history but never write it. The honest caveat: this layer only exists if the tool actually *loads* it for that session — trust prompts, path semantics, and per-project state can all silently leave a correct-looking config unbound. Treat it as defense-in-depth, never as the wall.
+4. **A pre-execution guard.** A hook that inspects each tool call before it runs and blocks anything touching a denylist. Two hard-won rules: invoke it by **absolute path** (a relative path plus a shared working directory can deadlock the whole session — failing closed, which is the correct direction), and verify it fires *in the real session*, not just in an isolated test of the script.
+5. **Doctrine.** A standing instruction file declaring the protected resources out of scope by policy, "even if a permission would allow it." This is the last layer, not the first — but it is the one that covers whatever the mechanics miss, and in my experience it holds even when the mechanical layers don't.
+
+Two operating rules bind all five layers. First: **a fence you haven't mechanically tested at its real layer is a hypothesis, not a control** — test the denial in the exact context that will run, before the first real task. Second: **make that test the agent's own first step.** Every isolation brief here opens with a fence self-test — probe the boundary, halt on any success — so a broken fence costs nothing and contaminates nothing.
+
+One more boundary that filesystem thinking misses: **network channels.** Account-level connectors and remote tools ride along with the agent's *login*, not the machine user — an OS fence can be kernel-tight while a connector still reaches the protected resource over the network. Enumerate every channel the agent has (filesystem, network/connectors, environment) and fence each at its own layer.
 
 Config syntax varies by tool and version; the example files in this repo (`.claude/settings.example.json`, `.claude/CLAUDE.example.md`) show the *shape* with placeholder paths. Verify field names against your tool's current documentation before relying on them.
 
@@ -63,7 +69,8 @@ A short list, absolute, enforced by the fence and re-stated in every brief:
 
 ## Failure modes, honestly
 
-- **Fences over-block.** Pattern guards stop legitimate commands; agents reroute or you whitelist deliberately. Annoying, and the correct trade.
+- **Fence configuration can silently fail to bind.** A correct-looking policy file is worthless if the tool never loaded it for that session. The fix is structural (the OS layer) plus procedural (the self-test as step one).
+- **Fences over-block.** Pattern guards stop legitimate commands — and a guard invoked by relative path once deadlocked an entire session of mine. Agents reroute, or you fix the config deliberately. Annoying, and the correct trade: closed beats open.
 - **Semantic search lies by omission.** Indexes lag fresh commits; exact-path reads beat search for recent files. Treat "search found nothing" as "this search found nothing".
 - **Agents fill gaps confidently.** The single highest-value line in any brief is the one that forbids answering from memory and requires a citation or a named check.
 - **Long sessions drift.** The incremental-output contract and the terminal-summary contract exist because the failure you must design for is the session that dies at 90%.
