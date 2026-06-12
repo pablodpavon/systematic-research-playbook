@@ -1,0 +1,42 @@
+{
+  "_comment": "EXAMPLE permission fence for a coding agent. Placeholder paths; deny rules win. Field names and syntax vary by tool and version — verify against your agent tool's current documentation before use.",
+  "permissions": {
+    "deny": [
+      "Write(./src/**)",
+      "Edit(./src/**)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(sudo:*)",
+      "Bash(rm -rf:*)",
+      "Bash(systemctl:*)"
+    ],
+    "allow": [
+      "Read(./**)",
+      "Write(./research/**)",
+      "Edit(./research/**)",
+      "Bash(python3:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(sed -n:*)",
+      "Bash(wc:*)",
+      "Bash(git log:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/guard_bash.py"
+          }
+        ]
+      }
+    ]
+  }
+}
