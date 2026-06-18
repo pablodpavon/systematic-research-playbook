@@ -18,7 +18,7 @@ Every hypothesis starts as an economic mechanism (who pays, and why does the opp
 
 ## The AI architecture in one paragraph
 
-Two roles. A chat-based co-designer writes specifications, makes judgment calls, and reviews output. A coding agent implements — under a written permission fence: explicit allowed write-scopes, denied paths, a pre-execution guard hook, and **no git rights** (a human makes every commit, every time). Work is delegated through versioned brief files on disk and launched with one line; outputs are written incrementally with status lines so an interrupted session loses nothing; audits split fact-extraction from judgment across *separate* agent instances so the agent never grades its own work; and every artifact that moves between machines is gated by a checksum. Full doctrine and example configs: `docs/AI_ORCHESTRATION.md` (next on the roadmap).
+Two roles. A chat-based co-designer writes specifications, makes judgment calls, and reviews output. A coding agent implements — under a written permission fence: explicit allowed write-scopes, denied paths, a pre-execution guard hook, and **no git rights** (a human makes every commit, every time). Work is delegated through versioned brief files on disk and launched with one line; outputs are written incrementally with status lines so an interrupted session loses nothing; audits split fact-extraction from judgment across *separate* agent instances so the agent never grades its own work; and every artifact that moves between machines is gated by a checksum. Full doctrine and the scrubbed example fence configs: [docs/AI_ORCHESTRATION.md](docs/AI_ORCHESTRATION.md) and [`.claude/`](.claude/).
 
 ## Repository map
 
@@ -27,17 +27,34 @@ README.md                    you are here
 LICENSE                      MIT
 docs/
   METHOD.md                  the research pipeline, step by step
-  AI_ORCHESTRATION.md        agent governance doctrine          (planned)
-  LESSONS.md                 hard-won rules, in generic form    (planned)
-example/                     a synthetic thesis run end-to-end  (planned)
-templates/                   empty pre-registration / results / incident templates (planned)
+  AI_ORCHESTRATION.md        agent-governance doctrine
+  LESSONS.md                 hard-won rules, in generic form (a living document)
+templates/
+  SPEC_template.md           empty frozen pre-registration
+  RESULTS_template.md        empty results / verdict
+  INCIDENT_template.md       empty incident report
+.claude/
+  CLAUDE.example.md          example agent doctrine (placeholder paths)
+  settings.example.json      example permission fence (placeholder paths)
+example/                     a deliberately false thesis, run end-to-end to its honest refutation
+  README.md                  what the example is, and is not
+  SPEC_preregistration.md    the frozen contract
+  RESULTS.md                 the verdict (REFUTED)
+  generate_data.py           null-by-construction synthetic data
+  run_test.py                the pipeline
+  ledger.py                  hash-chained trial ledger + verify_chain
+  test_example.py            tests, incl. a planted-answer detector
+  synthetic_prices.csv       seeded synthetic prices
+  trial_ledger.jsonl         the counted ledger
 ```
 
 ## Roadmap
 
-1. ✅ Method documentation (this commit)
-2. Agent-governance doctrine, scrubbed fence configs, document templates
-3. The worked example: a deliberately false thesis ("lunar-phase momentum") on seeded synthetic data, carried through the entire pipeline to its honest refutation — implemented by the coding agent itself, in an isolated session, under the documented fence
+1. ✅ Method documentation.
+2. ✅ Agent-governance doctrine, scrubbed fence configs, document templates.
+3. ✅ The worked example: a deliberately false thesis ("lunar-phase momentum") on seeded synthetic data, carried through the entire pipeline to its honest refutation — implemented by the coding agent itself, in an isolated session, under the documented fence.
+
+The three founding pieces are shipped. `docs/LESSONS.md` is a *living document*: it grows as the programme produces new lessons that can be stated in generic, publishable form.
 
 ## About
 
