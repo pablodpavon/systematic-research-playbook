@@ -1,65 +1,49 @@
-# systematic-research-playbook
+# Systematic Trading Research Platform
 
-**How I run a systematic-trading research programme with AI agents — built so that bad ideas die fast, cheap, and on the record.**
+**A solo-built platform for running quantitative research the way a regulated data function should — engineered so that bad ideas die fast, cheap, and on the record.**
 
-This repository documents a *method*, not a strategy. It covers two things: the research discipline (economic-mechanism-first hypotheses, frozen pre-registrations, a counted trial ledger, honest verdicts) and the AI-orchestration architecture (a permission-fenced coding agent, doc-driven execution briefs, two-instance audits, human-gated git) that I use to run a private systematic-trading research programme.
+This repository documents a **method and its engineering discipline**, not a strategy. It is the public, sanitized face of a private systematic-trading research programme: what you can see is *how* the research is run — the data architecture, the quality gates, the decision governance, and the validation standard — never *what* is traded.
 
-**What you will not find here.** The real programme's strategies, hypotheses, parameters, data, results, and infrastructure are private and never appear in this repository — not in files, not in commit history, not in examples. The worked example uses a deliberately absurd synthetic thesis on generated data. If you came to copy an edge, there isn't one here. If you came to copy a *way of working*, take all of it.
+> **What you will not find here.** The programme's strategies, hypotheses, parameters, data, results, and infrastructure are private and appear nowhere in this repository — not in files, not in commit history, not in examples.
 
-## Why this exists
+---
 
-Most exciting backtests are false discoveries. Test enough variations and something will look brilliant by luck alone — finance research has documented this at scale (Harvey, Liu & Zhu 2016; Bailey & López de Prado 2014), and it is the same multiple-testing failure that plagues published science generally (Ioannidis 2005). The method documented here is engineered against that failure — and against the subtler one of fooling yourself with your own tools.
+## Why it's rigorous
 
-The second reason: in 2026 anyone can have an AI write code. Almost nobody documents how to *govern* AI agents doing research — permission fences, audit splits, provable pre-registrations, human-gated commits. That governance layer is the part of this repository I have not seen written down elsewhere, so I wrote it down.
+Most exciting backtests are false discoveries: test enough variations and something will look brilliant by luck alone. The whole platform is engineered against that single failure mode — **make it structurally difficult to fool yourself** — enforced through architecture, tests, and documentation rather than good intentions.
 
-## The method in one paragraph
+## What this demonstrates
 
-Every hypothesis starts as an economic mechanism (who pays, and why does the opportunity persist?), gets grounded in published literature before any data is touched, is frozen as a pre-registration committed to git *before* the first run, is tested with the cheapest test that can falsify it, with every evaluated configuration counted in an append-only ledger that deflates reported performance for multiple testing — and ends in an honest verdict, where refutation is a success, not a failure. The full pipeline, with the statistics explained in plain language: [docs/METHOD.md](docs/METHOD.md).
+Engineering and data-governance discipline, mapped to the competencies it exercises:
 
-## The AI architecture in one paragraph
+| Competency | How it shows up here |
+|---|---|
+| **Data architecture & pipelines** | Versioned SQLite store, exchange-API ingestion (`ccxt`), idempotent (re-runnable) migrations, checksum-verified transfers between machines. |
+| **Testing & data QA** | 1,294+ automated tests as a reliability system: point-in-time (as-of-t) no-look-ahead guards, regression over frozen surfaces, hash-chain / fingerprint integrity checks, planted-bug self-tests. |
+| **Documentation-as-governance** | 45+ Architecture Decision Records, 30+ strategy memos, a living decision register, and 17 incident post-mortems — the auditable "decision papers" that make every call traceable. Frozen text is never edited; corrections are declared and labelled. |
+| **KPI / metric definition** | Success is a *pre-registered, falsifiable* rule with explicit PASS/REFUTE thresholds and no third outcome; headline metrics are **deflated for the number of trials** (multiple-testing correction). |
+| **Hypothesis → validation** | Books-first, mechanism-first; a pre-registration frozen to version control *before* any data contact; honest verdicts, where a refutation is a success. |
+| **Monitoring & reproducibility** | Long jobs run as monitored `systemd` services with health gates and structured logs; expensive runs are checkpointed and resumable; a documentation-freshness assertion fails loudly on drift. |
 
-Two roles. A chat-based co-designer writes specifications, makes judgment calls, and reviews output. A coding agent implements — under a written permission fence: explicit allowed write-scopes, denied paths, a pre-execution guard hook, and **no git rights** (a human makes every commit, every time). Work is delegated through versioned brief files on disk and launched with one line; outputs are written incrementally with status lines so an interrupted session loses nothing; audits split fact-extraction from judgment across *separate* agent instances so the agent never grades its own work; and every artifact that moves between machines is gated by a checksum. Full doctrine and the scrubbed example fence configs: [docs/AI_ORCHESTRATION.md](docs/AI_ORCHESTRATION.md) and [`.claude/`](.claude/).
+## The method
 
-## Repository map
+The full pipeline —
 
 ```
-README.md                    you are here
-LICENSE                      MIT
-docs/
-  METHOD.md                  the research pipeline, step by step
-  AI_ORCHESTRATION.md        agent-governance doctrine
-  LESSONS.md                 hard-won rules, in generic form (a living document)
-templates/
-  SPEC_template.md           empty frozen pre-registration
-  RESULTS_template.md        empty results / verdict
-  INCIDENT_template.md       empty incident report
-.claude/
-  CLAUDE.example.md          example agent doctrine (placeholder paths)
-  settings.example.json      example permission fence (placeholder paths)
-example/                     a deliberately false thesis, run end-to-end to its honest refutation
-  README.md                  what the example is, and is not
-  SPEC_preregistration.md    the frozen contract
-  RESULTS.md                 the verdict (REFUTED)
-  generate_data.py           null-by-construction synthetic data
-  run_test.py                the pipeline
-  ledger.py                  hash-chained trial ledger + verify_chain
-  test_example.py            tests, incl. a planted-answer detector
-  synthetic_prices.csv       seeded synthetic prices
-  trial_ledger.jsonl         the counted ledger
+mechanism → literature → frozen pre-registration → cheapest decisive test
+          → counted ledger → honest verdict → (survivors only) held-out → forward
 ```
 
-## Roadmap
+— is documented in **[docs/METHOD.md](docs/METHOD.md)**, written for a mixed audience: plain-language explanations for data/product readers, page-cited primary sources for quants (López de Prado, Harvey–Liu–Zhu, Ioannidis, Carver).
 
-1. ✅ Method documentation.
-2. ✅ Agent-governance doctrine, scrubbed fence configs, document templates.
-3. ✅ The worked example: a deliberately false thesis ("lunar-phase momentum") on seeded synthetic data, carried through the entire pipeline to its honest refutation — implemented by the coding agent itself, in an isolated session, under the documented fence.
+## How it's built
 
-The three founding pieces are shipped. `docs/LESSONS.md` is a *living document*: it grows as the programme produces new lessons that can be stated in generic, publishable form.
+Two roles, by design. A chat-based co-designer writes specifications, defines success criteria, and reviews output; a coding agent implements — under a **written permission fence**: explicit allowed write-scopes, denied paths, a pre-execution guard hook, and **no git rights** (a human makes every commit, every time). This is AI-assisted development with the governance made explicit and enforced, not assumed.
 
-## About
+## Scope & honesty
 
-I'm a senior business and data analyst, not a professional programmer — which is precisely why the orchestration layer exists, and why it is documented to be reproducible by other non-programmers in the same position. I design, specify, and audit; AI agents implement under fences I control. The research programme itself is private; this playbook is the part worth sharing.
+Independent research project on **paper trading**. No live-performance or profit claims are made — the value on display is method and engineering discipline, not returns.
 
-## License
+---
 
-MIT — see [LICENSE](LICENSE).
+*Full method: [docs/METHOD.md](docs/METHOD.md) · License: MIT*
